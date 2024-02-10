@@ -9,12 +9,6 @@ Una aplicación Flutter simple que sirve como Pokedex, permitiendo a los usuario
 - Permite a los usuarios buscar Pokémon por nombre.
 - Proporciona información detallada sobre cada Pokémon, incluyendo tipos y región.
 
-## Capturas de Pantalla
-
-![Pantalla de Inicio](screenshots/home_screen.png)
-![Pantalla de Lista](screenshots/list_screen.png)
-![Pantalla Individual de Pokémon](screenshots/individual_pokemon_screen.png)
-
 ## Inicio Rápido
 
 Asegúrate de tener Flutter instalado en tu máquina. Para obtener instrucciones sobre cómo instalar Flutter, consulta la [documentación oficial de Flutter](https://flutter.dev/docs/get-started/install).
