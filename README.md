@@ -50,14 +50,7 @@ Ten en cuenta que la API requiere una clave de API, y en el código proporcionad
 
 ¡Las contribuciones son bienvenidas! Si encuentras algún problema o tienes mejoras para sugerir, siéntete libre de abrir un problema o crear una solicitud de extracción.
 
-## Reconocimientos
 
-- Gracias a las comunidades de Flutter y Dart.
-- Datos de Pokémon proporcionados por la [API de Pokémon](https://apirender-express-pokemon.onrender.com/).
-
-## Licencia
-
-Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para obtener más detalles.
 
 ---
 
