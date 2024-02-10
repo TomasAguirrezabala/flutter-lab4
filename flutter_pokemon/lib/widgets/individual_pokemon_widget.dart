@@ -1,14 +1,50 @@
 //widget reutilizable para el registro individual
 import 'package:flutter/material.dart';
-import 'package:flutter_pokemon/screens/screens.dart';
+import 'package:flutter_pokemon/providers/pokemon_provider.dart';
+import 'package:provider/provider.dart';
+
+class PokemonUtils {
+  static Color getTypeColor(String type) {
+    switch (type.toLowerCase()) {
+      case 'grass':
+        return Colors.green;
+      case 'fire':
+        return Colors.red;
+      case 'water':
+        return Colors.blue;
+      case 'poison':
+        return Colors.purple;
+      case 'electric':
+        return Colors.amber;
+      case 'ground':
+        return Colors.brown;
+      case 'psychic':
+        return Colors.pink;
+      case 'rock':
+        return Colors.brown;
+      case 'ice':
+        return Colors.lightBlue;
+      case 'fighting':
+        return Colors.orange;
+      case 'flying':
+        return Colors.cyan;
+      case 'normal':
+        return const Color.fromARGB(255, 231, 139, 170);
+      case 'fairy':
+        return Colors.pink;
+
+      default:
+        return Colors.grey;
+    }
+  }
+
+  static List<Color> getCombinedTypeColors(List<dynamic> types) {
+    return types.map((type) => getTypeColor(type)).toList();
+  }
+}
 
 class IndividualPokemonScreen extends StatefulWidget {
-  final Pokemon pokemon;
-
-  const IndividualPokemonScreen({
-    Key? key,
-    required this.pokemon,
-  }) : super(key: key);
+  const IndividualPokemonScreen({Key? key}) : super(key: key);
 
   @override
   _IndividualPokemonScreenState createState() =>
@@ -23,7 +59,10 @@ class _IndividualPokemonScreenState extends State<IndividualPokemonScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = PokemonUtils.getCombinedTypeColors(widget.pokemon.types);
+    PokemonProvider pokemonProvider = Provider.of<PokemonProvider>(context);
+    Map<String, dynamic> pokemon = pokemonProvider.pokemon;
+    final colors =
+        PokemonUtils.getCombinedTypeColors(pokemonProvider.pokemon["type"]);
 
     return Scaffold(
       appBar: AppBar(
@@ -44,14 +83,14 @@ class _IndividualPokemonScreenState extends State<IndividualPokemonScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.asset(
-                '${widget.pokemon.name.toLowerCase()}.png',
+                '${pokemon['name'].toLowerCase()}.png',
                 width: 150,
                 height: 150,
                 fit: BoxFit.cover,
               ),
               const SizedBox(height: 20),
               Text(
-                'Name: ${widget.pokemon.name}',
+                'Name: ${pokemon['name']}',
                 style: TextStyle(
                   color: colors.length == 2 ? Colors.white : null,
                   fontSize: 20,
@@ -59,14 +98,14 @@ class _IndividualPokemonScreenState extends State<IndividualPokemonScreen> {
                 ),
               ),
               Text(
-                'Types: ${widget.pokemon.types.join(', ')}',
+                'Types: ${pokemon["type"].join(', ')}',
                 style: TextStyle(
                   color: colors.length == 2 ? Colors.white : null,
                   fontSize: 16,
                 ),
               ),
               Text(
-                'Region: ${widget.pokemon.region}',
+                'Region: ${pokemon["region"]}',
                 style: TextStyle(
                   color: colors.length == 2 ? Colors.white : null,
                   fontSize: 16,

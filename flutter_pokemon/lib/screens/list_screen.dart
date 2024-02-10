@@ -1,171 +1,112 @@
-//lista de registros
 import 'package:flutter/material.dart';
+import 'package:flutter_pokemon/providers/pokemon_provider.dart';
 import 'package:flutter_pokemon/screens/screens.dart';
-
-class Pokemon {
-  final int id;
-  final String name;
-  final List<String> types;
-  final String region;
-  bool isFavorite;
-  Pokemon({
-    required this.id,
-    required this.name,
-    required this.types,
-    required this.region,
-    this.isFavorite = false,
-  });
-}
-
-class PokemonUtils {
-  static Color getTypeColor(String type) {
-    switch (type.toLowerCase()) {
-      case 'grass':
-        return Colors.green;
-      case 'fire':
-        return Colors.red;
-      case 'water':
-        return Colors.blue;
-      case 'poison':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  static List<Color> getCombinedTypeColors(List<String> types) {
-    return types.map((type) => getTypeColor(type)).toList();
-  }
-}
+import 'package:provider/provider.dart';
 
 class ListScreen extends StatefulWidget {
+  ListScreen();
+
   @override
   _ListScreenState createState() => _ListScreenState();
 }
 
 class _ListScreenState extends State<ListScreen> {
-  final List<Pokemon> pokemons = [
-    Pokemon(
-      id: 1,
-      name: 'Bulbasaur',
-      types: ['Grass', 'Poison'],
-      region: 'Kanto',
-    ),
-    Pokemon(
-      id: 2,
-      name: 'Charmander',
-      types: ['Fire'],
-      region: 'Kanto',
-    ),
-    Pokemon(
-      id: 3,
-      name: 'Squirtle',
-      types: ['Water'],
-      region: 'Kanto',
-    ),
-  ];
-
-  TextEditingController _typeController = TextEditingController();
-
-  List<Pokemon> _filteredPokemons = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _filteredPokemons = List.from(pokemons);
-  }
+  TextEditingController _searchController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    PokemonProvider pokemonProvider = Provider.of<PokemonProvider>(context);
+
+    // Función para filtrar la lista de Pokémon por nombre
+    List<Map<String, dynamic>> filteredPokemonList() {
+      String searchTerm = _searchController.text.toLowerCase();
+      List<Map<String, dynamic>> filteredList = [];
+
+      for (var pokemon in pokemonProvider.pokemonList) {
+        if (pokemon['name'].toString().toLowerCase().contains(searchTerm)) {
+          filteredList.add(pokemon);
+        }
+      }
+
+      return filteredList;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pokedex'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {},
+          ),
+        ],
       ),
       body: Column(
         children: [
-          // TextFormField para filtrar por tipo
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: TextFormField(
-              controller: _typeController,
+            child: TextField(
+              controller: _searchController,
+              onChanged: (value) {
+                setState(() {});
+              },
               decoration: InputDecoration(
-                labelText: 'Filter by Type',
+                labelText: 'Buscar Pokémon por nombre',
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear),
+                  icon: Icon(Icons.clear),
                   onPressed: () {
-                    // Limpiar el campo de texto y restaurar la lista completa de Pokémon
-                    setState(() {
-                      _typeController.clear();
-                      _filteredPokemons = List.from(pokemons);
-                    });
+                    _searchController.clear();
+
+                    setState(() {});
                   },
                 ),
               ),
-              onChanged: (value) {
-                // Filtrar la lista de Pokémon por tipo
-                setState(() {
-                  _filteredPokemons = pokemons
-                      .where((pokemon) => pokemon.types.any((type) =>
-                          type.toLowerCase().contains(value.toLowerCase())))
-                      .toList();
-                });
-              },
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: _filteredPokemons.length,
-              itemBuilder: (BuildContext context, int index) {
-                final pokemon = _filteredPokemons[index];
-                PokemonUtils.getCombinedTypeColors(pokemon.types);
-                return ListTile(
-                  title: Row(
-                    children: [
-                      Image.asset(
-                        '${pokemon.name.toLowerCase()}.png',
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            pokemon.name,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            'Types: ${pokemon.types.join(', ')}',
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                          Text(
-                            'Region: ${pokemon.region}',
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => IndividualPokemonScreen(
-                          pokemon: pokemon,
-                        ),
-                      ),
-                    );
-                  },
-                  contentPadding: const EdgeInsets.all(10),
-                  dense: true,
-                  visualDensity:
-                      const VisualDensity(horizontal: 0, vertical: -4),
-                );
+            child: RefreshIndicator(
+              onRefresh: () async {
+                return await pokemonProvider.fetchPokemonList();
               },
+              child: ListView.builder(
+                itemCount: filteredPokemonList().length,
+                itemBuilder: (context, index) {
+                  var pokemon = filteredPokemonList()[index];
+                  var nombre = pokemon['name'];
+
+                  return ListTile(
+                    leading: Image.asset(
+                      '${pokemon['name'].toLowerCase()}.png',
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                    ),
+                    title: Text('$nombre'),
+                    onLongPress: () async {
+                      try {
+                        await pokemonProvider
+                            .fetchPokemonDetails(pokemon['id']);
+                        // Verificar si los datos se cargaron correctamente
+                        if (pokemonProvider.pokemon.isNotEmpty) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const IndividualPokemonScreen(),
+                            ),
+                          );
+                        } else {
+                          // Maneja el caso donde los datos no se cargaron correctamente
+                          print('Error: Datos del Pokémon no disponibles');
+                        }
+                      } catch (error) {
+                        // Manejar errores durante la carga de datos
+                        print('Error al obtener detalles del Pokémon: $error');
+                      }
+                    },
+                  );
+                },
+              ),
             ),
           ),
         ],
