@@ -52,6 +52,6 @@ Ten en cuenta que la API requiere una clave de API, y en el código proporcionad
 
 
 
----
 
-Siéntete libre de personalizar el README de acuerdo con los detalles y requisitos específicos de tu proyecto.
+
+
